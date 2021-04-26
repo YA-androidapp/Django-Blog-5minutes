@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}
+    {% trans 'Log in' %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h1>
+            {% trans 'Log in' %}
+        </h1>
+    </div>
+    {% if user.is_authenticated %}
+        {% if user.is_anonymous %}
+            {% trans 'Please activate your account'%}
+        {% else %}
+            {% blocktrans %}
+                You are logged as {{ user }}
+            {% endblocktrans %}
+            <a href="{{ logout_reversed_url }}">{% trans 'Log out' %}</a>
+        {% endif %}
+    {%  else %}
+        {% if form.errors %}
+            <div class="row">
+                <div class="col">
+
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+
+
+                <form class="col" method="POST" action="{{ login_reversed_url }}">
+                    {%  csrf_token %}
+
+                    {% for input in form %}
+                        <div class="input-group row">
+                            <div class="col">
+
+                            <label for="{{ input.name }}">{{ input.label }}</label>
+                            </div>
+                            <div class="col">
+
+                            {{ input }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="row center">
+
+                    <button type="submit" class="col center btn btn-primary ">
+                        {% trans 'Log in' %}
+                        <i class="fa fa-send"></i>
+                    </button>
+                    </div>
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}" />
+                    {% else %}
+                        <input type="hidden" name="next" value="/" />
+                    {% endif %}
+                    <br/>
+                </form>
+
+        </div>
+        <div class="row">
+            <div class="col">
+                {% if password_reset_allowed %}
+                    <a class="left"  href="{{ password_reset_reversed_url }}">
+                        {% trans 'Forgot password?' %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {% if registration_allowed %}
+                    <a class="right" href="{{ signup_reversed_url }}{% if next %}?next={{ next }}{% endif %}">
+                        {% trans 'Sign up' %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+    {% endif %}
+{% endblock %}

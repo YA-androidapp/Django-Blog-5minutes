@@ -1,0 +1,28 @@
+version: "3"
+
+volumes:
+  dbvolume:
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - dbvolume:/var/lib/postgresql/data
+  web:
+    image: yaand/django-blog-5minutes-web
+    build: .
+    command: bash -c 'python manage.py makemigrations && python manage.py migrate && DJANGO_SUPERUSER_PASSWORD="Passw0rd#" DJANGO_SUPERUSER_USERNAME="Admin" DJANGO_SUPERUSER_EMAIL="admin@example.net" python manage.py createsuperuser --noinput && python manage.py runserver 0.0.0.0:8000'
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_SSL_MODE=disable
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
