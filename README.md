@@ -210,6 +210,79 @@ services:
 docker-compose up -d --build
 ```
 
+### Kubernetes
+
+```sh
+nano myblog.yaml
+```
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myblog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myblog
+  template:
+    metadata:
+      labels:
+        app: myblog
+    spec:
+      containers:
+        - name: myblog
+          image: yaand/django-blog-5minutes-web
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_HOST
+              value: "*****.postgres.database.azure.com"
+            - name: DATABASE_USER
+              value: "postgres"
+            - name: DATABASE_PASSWORD
+              value: "**********"
+            - name: DATABASE_NAME
+              value: "postgres"
+            - name: DATABASE_SSL_MODE
+              value: "require"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - myblog
+              topologyKey: "kubernetes.io/hostname"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-svc
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+  selector:
+    app: myblog
+```
+
+```sh
+kubectl config get-contexts
+kubectl apply -f myblog.yml
+
+kubectl get service myblog --watch
+kubectl get pods --watch
+
+kubectl exec myblog--*****-*****-***** -- python /code/manage.py migrate
+kubectl exec myblog--*****-*****-***** -- bash -c 'DJANGO_SUPERUSER_PASSWORD="Passw0rd#" DJANGO_SUPERUSER_USERNAME="Admin" DJANGO_SUPERUSER_EMAIL="admin@example.net" python manage.py createsuperuser --noinput'
+```
+
+http://localhost:8000/post/
+
 ---
 
 Copyright (c) 2021 YA-androidapp(https://github.com/YA-androidapp) All rights reserved.

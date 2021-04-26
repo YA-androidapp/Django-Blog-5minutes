@@ -1,0 +1,8 @@
+docker-compose.yml
+myblog.yml
+
+*.sqlite*
+*.db
+
+.DS_Store
+myenv
